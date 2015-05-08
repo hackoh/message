@@ -1,0 +1,2 @@
+php oil g model room number:varchar[255] passcode:varchar[255] name:varchar[255]
+php oil g message room_id:int sender:int text:text

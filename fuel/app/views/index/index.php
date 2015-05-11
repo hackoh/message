@@ -7,13 +7,13 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<!-- Your app title -->
-	<title>m</title>
+	<title>talk</title>
 	<!-- Path to Framework7 Library CSS-->
 	<link rel="stylesheet" href="/assets/css/framework7.min.css">
 	<!-- Path to your custom app styles-->
-	<link rel="stylesheet" href="/assets/css/my-app.css">
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
 </head>
-<body>
+<body class="theme-pink">
 	<!-- Status bar overlay for full screen mode (PhoneGap) -->
 	<div class="statusbar-overlay"></div>
 	<!-- Panels overlay-->
@@ -21,12 +21,11 @@
 	<!-- Views -->
 	<div class="views">
 		<!-- Your main view, should have "view-main" class -->
-		<div class="view view-main">
+		<div class="view view-main color-red">
 			<!-- Top Navbar-->
 			<div class="navbar">
 				<div class="navbar-inner">
-					<!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
-					<div class="center sliding">m</div>
+					<div class="left"><a href="/"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
 				</div>
 			</div>
 			<!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
@@ -35,7 +34,7 @@
 				<div data-page="index" class="page">
 					<!-- Scrollable page content -->
 					<div class="page-content">
-						<div class="content-block-title">Enter room number &amp; pass code.</div>
+						<div class="content-block-title">Enter number &amp; passcode</div>
 						<div class="list-block">
 							<ul>
 								<!-- Text inputs -->
@@ -52,7 +51,7 @@
 								<li>
 									<div class="item-content">
 										<div class="item-inner">
-											<div class="item-title label">Pass code</div>
+											<div class="item-title label">Passcode</div>
 											<div class="item-input">
 												<input type="number" name="passcode">
 											</div>
@@ -62,10 +61,14 @@
 							</ul>
 						</div>
 						<div class="content-block">
-							<p class="buttons-row">
-							  <a href="javascript: loginRoom(1);" class="button">as A</a>
-							  <a href="javascript: loginRoom(2);" class="button">as B</a>
-							</p>
+							<div class="row">
+							  <div class="col-50">
+							    <a href="javascript: loginRoom(1);" class="button button-big color-pink button-fill">As A</a>
+							  </div>
+							  <div class="col-50">
+							    <a href="javascript: loginRoom(2);" class="button button-big color-blue button-fill">As B</a>
+							  </div>
+							</div>
 						</div>
 					</div>
 				</div>

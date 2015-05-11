@@ -69,7 +69,7 @@ class Chat implements MessageComponentInterface
 
     	if ($data['text']) {
 	    	$message = \Model_Message::forge(array(
-	    		'text' => $data['text'],
+	    		'text' => \Crypt::encode($data['text']),
 	    		'sender' => $data['sender'],
 	    		'room_id' => $room->id
 	    	));
@@ -124,41 +124,16 @@ class Message
 {
 	public static function run()
 	{
-        // \Package::load('email');
 	    $server = IoServer::factory(new WsServer(new Chat), 9000);
 	    $server->run();
 	}
 
-    public static function email()
+    public static function crypt()
     {
-        // \Package::load('email');
-        // \Package::load('background');
-        
-        $email = \Email::forge('message');
-        $email->from('no-repry@impv.co.jp', 'm');
-
-        $email->to('hackoh@softbank.ne.jp');
-        // $email->to('ikezaki@impv.co.jp');
-
-        $email->subject('メッセージを受信しました');
-        $body = \View::forge('email/message', array(
-            'text' => 'test',
-            'url' => 'http://m.impv.net/',
-        ));
-        $email->body($body);
-
-        try
+        foreach (\Model_Message::find('all') as $message)
         {
-            \Background::forge(array($email, 'send'))->run();
-            // $email->send();
-        }
-        catch (\Email\EmailValidationFailedException $e)
-        {
-            \Log::warning('EmailValidationFailedException occured email:'.$room->$email);
-        }
-        catch (\Email\EmailSendingFailedException $e)
-        {
-            \Log::warning('EmailSendingFailedException occured email:'.$room->$email);
+            $message->text = \Crypt::encode($message->text);
+            $message->save();
         }
     }
 }

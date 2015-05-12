@@ -1,14 +1,4 @@
 <?php
-/**
- * Fuel is a fast, lightweight, community driven PHP5 framework.
- *
- * @package    Fuel
- * @version    1.7
- * @author     Fuel Development Team
- * @license    MIT License
- * @copyright  2010 - 2014 Fuel Development Team
- * @link       http://fuelphp.com
- */
 
 namespace Fuel\Tasks;
 
@@ -16,18 +6,6 @@ use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-
-/**
- * Robot example task
- *
- * Ruthlessly stolen from the beareded Canadian sexy symbol:
- *
- *		Derek Allard: http://derekallard.com/
- *
- * @package		Fuel
- * @version		1.0
- * @author		Phil Sturgeon
- */
 
 class Chat implements MessageComponentInterface
 {
@@ -45,6 +23,8 @@ class Chat implements MessageComponentInterface
     	\Cli::write($msg);
 
     	$data = json_decode($msg, true);
+
+        \Model_Room::clear_cached_objects();
 
     	$room = \Model_Room::find_by_number($data['number']);
 
@@ -86,7 +66,6 @@ class Chat implements MessageComponentInterface
 
                 $email->to($address);
 
-                $email->subject('メッセージを受信しました');
                 $body = \View::forge('email/message', array(
                     'text' => $data['text'],
                     'url' => 'http://m.impv.net/rooms/'.$room->number.'/'.$to_sender,
@@ -96,6 +75,7 @@ class Chat implements MessageComponentInterface
                 try
                 {
                    \Background::forge(array($email, 'send'))->run();
+                    \Cli::write('sent to '.$address);
                 }
                 catch (\Email\EmailValidationFailedException $e)
                 {
@@ -134,6 +114,33 @@ class Message
         {
             $message->text = \Crypt::encode($message->text);
             $message->save();
+        }
+    }
+
+    public static function test()
+    {
+        $email = \Email::forge('message');
+        $email->from('no-repry@impv.co.jp', 'm');
+
+        $email->to('hackoh@softbank.ne.jp');
+
+        $body = \View::forge('email/message', array(
+            'text' => 'test',
+            'url' => '',
+        ));
+        $email->body($body);
+
+        try
+        {
+           \Background::forge(array($email, 'send'))->run();
+        }
+        catch (\Email\EmailValidationFailedException $e)
+        {
+            \Log::warning('EmailValidationFailedException occured email:'.$address);
+        }
+        catch (\Email\EmailSendingFailedException $e)
+        {
+            \Log::warning('EmailSendingFailedException occured email:'.$address);
         }
     }
 }

@@ -26,6 +26,7 @@
 			<div class="navbar">
 				<div class="navbar-inner">
 					<div class="left"><a href="/"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
+					<div class="right"><a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a></div>
 				</div>
 			</div>
 			<!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
@@ -35,7 +36,7 @@
 					<!-- messagebar -->
 					<div class="toolbar messagebar messagebar-init" data-max-height="200">
 						<div class="toolbar-inner">
-							<textarea placeholder="Message"></textarea><a href="javascript: send(<?php echo $sender ?>)" class="link">Send</a>
+							<textarea placeholder="Message"></textarea><a href="javascript:;" data-sender="<?php echo $sender ?>" class="link send-button">Send</a>
 						</div>
 					</div>
 					<!-- Scrollable page content -->
@@ -52,11 +53,39 @@
 			</div>
 		</div>
 	</div>
+	<div class="popup popup-setting">
+		<div class="navbar">
+			<div class="navbar-inner">
+				<div class="left"></div>
+				<div class="center">Settings</div>
+				<div class="right"><a href="javascript:;" class="close-popup button"><i class="fa fa-times"></i></a></div>
+			</div>
+		</div>
+		
+		<div class="content-block-title">Auto-sender settings</div>
+		<div class="list-block">
+			<ul>
+				<li>
+					<div class="item-content">
+						<div class="item-inner">
+							<div class="item-title label">E-mail</div>
+							<div class="item-input">
+								<input type="text" placeholder="E-mail" value="<?php echo $room->{'email_'.$sender} ?>" name="email">
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<p class="content-block"><a href="javascript:;" class="submit-setting button button-fill color-pink">OK</a></p>
+		
+	</div>
 <!-- Path to Framework7 Library JS-->
 <script type="text/javascript" src="/assets/js/framework7.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery.js"></script>
 <script type="text/javascript" src="/assets/js/autogrow.min.js"></script>
 <script>
+	var myApp = new Framework7();
 	var conn = new WebSocket('ws://m.impv.net:9000');
 	conn.onopen = function(e) {
 	    // console.log("Connection established!");
@@ -90,7 +119,7 @@
 	    }
 
 	};
-	function send(sender) {
+	function sendMessage(sender) {
 		var msg = $('textarea').val();
 		$('textarea').val('');
 		$('textarea').css({
@@ -134,6 +163,32 @@
 		});
 		$('textarea').autogrow({
 			speed: 0
+		});
+		$('.submit-setting').on('click', function() {
+			var email = $('[name=email]').val();
+			if ((email != '') && ! email.match(/.+\@.+/)) {
+				myApp.alert('Invalid E-mail', 'Error');
+			} else {
+				$.ajax({
+					url: '<?php echo Uri::create('rooms/'.$room->number.'/'.$sender.'/email') ?>',
+					type: 'post',
+					dataType: 'json',
+					data: {
+						email: email
+					},
+					success: function(response) {
+						myApp.closeModal('.popup-setting');
+					},
+					error: function() {
+						myApp.alert('Internal server error', 'Error');
+					}
+				});
+			}
+		});
+
+		$('.send-button').on('click', function() {
+			var sender = $(this).attr('data-sender');
+			sendMessage(sender);
 		});
 	});
 </script>

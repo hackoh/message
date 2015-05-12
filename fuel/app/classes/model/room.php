@@ -46,4 +46,9 @@ class Model_Room extends \Orm\Model
 		return $val;
 	}
 
+	public static function clear_cached_objects()
+    {
+        static::$_cached_objects['Model_Room'] = array();
+    }
+
 }

@@ -25,7 +25,7 @@
 			<!-- Top Navbar-->
 			<div class="navbar">
 				<div class="navbar-inner">
-					<div class="left"><a href="/"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
+					<div class="left"><a href="/" class="go-home"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
 					<div class="right"><a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a></div>
 				</div>
 			</div>
@@ -89,6 +89,12 @@
 	var conn = new WebSocket('ws://m.impv.net:9000');
 	conn.onopen = function(e) {
 	    // console.log("Connection established!");
+	    conn.send(JSON.stringify({
+	    	number: '<?php echo $room->number ?>',
+			sender: <?php echo $sender ?>,
+			text: '',
+			action: 'join'
+		}));
 	};
 	conn.onmessage = function(e) {
 	    // console.log(e.data);
@@ -189,6 +195,10 @@
 		$('.send-button').on('click', function() {
 			var sender = $(this).attr('data-sender');
 			sendMessage(sender);
+		});
+
+		$('.go-home').on('click', function() {
+			document.location.href = '/';
 		});
 	});
 </script>

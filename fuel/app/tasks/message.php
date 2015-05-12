@@ -10,19 +10,37 @@ use Ratchet\WebSocket\WsServer;
 class Chat implements MessageComponentInterface
 {
     protected $clients;
+    protected $rooms = array();
  
     public function __construct() {
-        $this->clients = new \SplObjectStorage;
+        // $this->clients = new \SplObjectStorage;
     }
  
     public function onOpen(ConnectionInterface $conn) {
-        $this->clients->attach($conn);
+        // $this->clients->attach($conn);
     }
  
     public function onMessage(ConnectionInterface $from, $msg) {
+
+        // ob_start();
+        // var_dump($this->rooms);
+        // \Cli::write(ob_get_clean());
+
     	\Cli::write($msg);
 
     	$data = json_decode($msg, true);
+
+        if ($data['action'] == 'join')
+        {
+            if ( ! isset($this->rooms[$data['number']]))
+            {
+                $this->rooms[$data['number']] = new \SplObjectStorage;
+            }
+
+            $this->rooms[$data['number']]->attach($from);
+
+            return;
+        }
 
         \Model_Room::clear_cached_objects();
 
@@ -37,7 +55,14 @@ class Chat implements MessageComponentInterface
 
     	$sent = false;
 
-    	foreach ($this->clients as $client) {
+        $clients = isset($this->rooms[$data['number']]) ? $this->rooms[$data['number']] : null;
+
+        if ( ! $clients)
+        {
+            return;
+        }
+
+    	foreach ($clients as $client) {
     		if ($from != $client)
     		{
 				$sent = true;
@@ -47,7 +72,8 @@ class Chat implements MessageComponentInterface
 
         \Cli::write('sent = '.($sent ? 'true' : 'false'));
 
-    	if ($data['text']) {
+    	if ($data['text'])
+        {
 	    	$message = \Model_Message::forge(array(
 	    		'text' => \Crypt::encode($data['text']),
 	    		'sender' => $data['sender'],
@@ -92,7 +118,10 @@ class Chat implements MessageComponentInterface
     }
  
     public function onClose(ConnectionInterface $conn) {
-        $this->clients->detach($conn);
+        foreach ($this->rooms as $clients)
+        {
+            $clients->detach($conn);
+        }
     }
  
     public function onError(ConnectionInterface $conn, \Exception $e) {

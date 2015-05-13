@@ -2,27 +2,50 @@
 
 class Controller_Room extends Controller
 {
-	public function action_messages($number, $sender)
+	public function action_messages($number, $sender = null)
 	{
 
-		$room = Model_Room::find_by_number($number);
-
-		if ( ! $room)
+		if (Input::method() == 'DELETE')
 		{
-			throw new HttpNotFoundException();
-		}
+			$room = Model_Room::find_by_number($number);
 
-		if ($room->number != Session::get('room'))
+			if ( ! $room)
+			{
+				throw new HttpNotFoundException();
+			}
+
+			if ($room->number != Session::get('room'))
+			{
+				return Response::forge(null, 400);
+			}
+
+			foreach ($room->messages as $message)
+			{
+				$message->delete();
+			}
+
+			return Response::forge(Format::forge(array('result' => 'OK'))->to_json(), 200);
+		}
+		else
 		{
-			Response::redirect('/');
-		}
-		
+			$room = Model_Room::find_by_number($number);
 
-		return Response::forge(View::forge('room/messages', array(
-			'number' => $number,
-			'sender' => $sender,
-			'room' => $room,
-		)));
+			if ( ! $room)
+			{
+				throw new HttpNotFoundException();
+			}
+
+			if ($room->number != Session::get('room'))
+			{
+				Response::redirect('/');
+			}
+
+			return Response::forge(View::forge('room/messages', array(
+				'number' => $number,
+				'sender' => $sender,
+				'room' => $room,
+			)));
+		}
 	}
 
 	public function action_email($number, $sender)

@@ -26,7 +26,7 @@
 			<div class="navbar">
 				<div class="navbar-inner">
 					<div class="left"><a href="/" class="go-home"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
-					<div class="right"><a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a></div>
+					<div class="right"><a href="javascript:;" class="delete-button button button-fill"><i class="fa fa-trash"></i></a><a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a></div>
 				</div>
 			</div>
 			<!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
@@ -42,11 +42,14 @@
 					<!-- Scrollable page content -->
 					<div class="page-content">
 						<div class="messages">
-<?php foreach ($room->messages as $message): ?>
+<?php $time = 0; foreach ($room->messages as $message): ?>
+<?php if (($message->created_at - $time) > 1800): ?>
+							<div class="messages-date"><?php echo date('Y-m-d', $message->created_at) ?>&nbsp;<span><?php echo date('H:i', $message->created_at) ?></span></div>
+<?php endif ?>
 							<div class="message message-last message-with-tail message-<?php echo $message->sender == $sender ? 'sent': 'received' ?>">
 								<div class="message-text"><?php echo nl2br(\Crypt::decode($message->text)) ?></div>
 							</div>
-<?php endforeach ?>	
+<?php $time = $message->created_at; endforeach ?>	
 						</div>
 					</div>
 				</div>
@@ -199,6 +202,23 @@
 
 		$('.go-home').on('click', function() {
 			document.location.href = '/';
+		});
+
+		$('.delete-button').on('click', function() {
+			myApp.confirm('Do you wish to delete all logs?', 'Delete all', function() {
+				$.ajax({
+					url: '<?php echo Uri::create('rooms/'.$room->number.'/messages') ?>',
+					type: 'DELETE',
+					success: function() {
+						$('.messages').empty();
+					},
+					error: function() {
+						myApp.alert('Internal server error', 'Error');
+					}
+				});
+			}, function() {
+				// 
+			});
 		});
 	});
 </script>

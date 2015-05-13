@@ -99,6 +99,11 @@
 			action: 'join'
 		}));
 	};
+	conn.onclose = function(e) {
+		myApp.alert('Connection closed. Auto reload activated.', 'Auto reload', function() {
+			document.location.reload();
+		});
+	}
 	conn.onmessage = function(e) {
 	    // console.log(e.data);
 	    var data = $.parseJSON(e.data);

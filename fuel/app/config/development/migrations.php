@@ -10,6 +10,7 @@ return array (
         1 => '002_create_messages',
         2 => '003_add_email_1_to_rooms',
         3 => '004_add_email_2_to_rooms',
+        4 => '005_create_images',
       ),
     ),
     'module' => 

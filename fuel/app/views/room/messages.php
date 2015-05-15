@@ -36,7 +36,9 @@
 					<!-- messagebar -->
 					<div class="toolbar messagebar messagebar-init" data-max-height="200">
 						<div class="toolbar-inner">
-							<textarea placeholder="Message"></textarea><a href="javascript:;" data-sender="<?php echo $sender ?>" class="link send-button">Send</a>
+							<a href="javascript:;" data-sender="<?php echo $sender ?>" class="image-button link"><i class="fa fa-photo fa-lg"></i></a>&nbsp;
+							<textarea placeholder="Message"></textarea>
+							<a href="javascript:;" data-sender="<?php echo $sender ?>" class="link send-button">Send</a>
 						</div>
 					</div>
 					<!-- Scrollable page content -->
@@ -83,17 +85,26 @@
 		<p class="content-block"><a href="javascript:;" class="submit-setting button button-fill color-pink">OK</a></p>
 		
 	</div>
+	<form id="form" enctype="multipart/form-data" method="post"></form>
+	<!--audio id="remote"></audio-->
 <!-- Path to Framework7 Library JS-->
 <script type="text/javascript" src="/assets/js/framework7.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery.js"></script>
 <script type="text/javascript" src="/assets/js/autogrow.min.js"></script>
+<script src="https://skyway.io/dist/0.3/peer.js"></script>
 <script>
+
+	var getUserMedia = ( navigator.getUserMedia ||
+					   navigator.webkitGetUserMedia ||
+					   navigator.mozGetUserMedia ||
+					   navigator.msGetUserMedia);
+
 	var myApp = new Framework7();
-	var conn = new WebSocket('ws://m.impv.net:9000');
+	var conn = new WebSocket('ws://<?php echo Input::server('SERVER_NAME') ?>:9000');
 	conn.onopen = function(e) {
-	    // console.log("Connection established!");
-	    conn.send(JSON.stringify({
-	    	number: '<?php echo $room->number ?>',
+		// console.log("Connection established!");
+		conn.send(JSON.stringify({
+			number: '<?php echo $room->number ?>',
 			sender: <?php echo $sender ?>,
 			text: '',
 			action: 'join'
@@ -105,32 +116,72 @@
 		});
 	}
 	conn.onmessage = function(e) {
-	    // console.log(e.data);
-	    var data = $.parseJSON(e.data);
-	    if (data.action == 'send') {
-	    	var $message = $('<div class="message message-last message-with-tail"><div class="message-text"></div></div>');
-	    	if (data.sender == '<?php echo $sender ?>') {
-	    		$message.addClass('message-sent');
-	    	} else {
-	    		$message.addClass('message-received');
-	    	}
-	    	$message.find('.message-text').html(data.text);
-	    	$('.messages').append($message);
-	    	$('.messages .message-received.message-input').remove();
-	    	$('.page-content').animate({
-	    		scrollTop: $('.messages').height()
-	    	});
-	    } else if (data.action == 'input' && data.sender != '<?php echo $sender ?>') {
-	    	if ($('.messages .message-received.message-input').length == 0) {
-	    		var $message = $('<div class="message-last message-with-tail message message-received message-input"><div class="message-text">Entering text...</div></div>');
-	    		$('.messages').append($message);
-	    	}
-	    	$('.page-content').animate({
-	    		scrollTop: $('.messages').height()
-	    	});
-	    } else if (data.action == 'stop' && data.sender != '<?php echo $sender ?>') {
-	    	$('.messages .message-received.message-input').remove();
-	    }
+		// console.log(e.data);
+		var data = $.parseJSON(e.data);
+		if (data.action == 'send') {
+			var $message = $('<div class="message message-last message-with-tail"><div class="message-text"></div></div>');
+			if (data.sender == '<?php echo $sender ?>') {
+				$message.addClass('message-sent');
+			} else {
+				$message.addClass('message-received');
+			}
+			$message.find('.message-text').html(data.text);
+			$('.messages').append($message);
+			$('.messages .message-received.message-input').remove();
+			$('.page-content').animate({
+				scrollTop: $('.messages').height()
+			});
+		} else if (data.action == 'input' && data.sender != '<?php echo $sender ?>') {
+			if ($('.messages .message-received.message-input').length == 0) {
+				var $message = $('<div class="message-last message-with-tail message message-received message-input"><div class="message-text"  style="padding-bottom: 0px"><img src="<?php echo Uri::create('assets/img/entering.gif') ?>" width="45" /></div></div>');
+				$('.messages').append($message);
+			}
+			$('.page-content').animate({
+				scrollTop: $('.messages').height()
+			});
+		} else if (data.action == 'stop' && data.sender != '<?php echo $sender ?>') {
+			$('.messages .message-received.message-input').remove();
+		}
+
+		// else if (data.action == 'call' && data.sender != '<?php echo $sender ?>') {
+		// 	var $message = $('<div class="message-last message-with-tail message message-received message-call"><div class="message-text"><span>Call from '+(data.sender == 1 ? 'A' : 'B')+'</span><a href="javascript:;" class="button button-pink button-fill">Accept</a></div></div>');
+		// 		$('.messages').append($message);
+		// 	var $accept = $message.find('a');
+		// 	var remoteId = data.text;
+		// 	$accept.on('click', function() {
+		// 		$('.messages .message-received.message-call').remove();
+		// 		getUserMedia({"video":false, "audio":true}, function(stream){
+		// 			peerCall_ = peer.call(remoteId, stream);
+		// 			peerCall_.on('stream', function(remoteStream){
+		// 				var $remoteAudio_ = $('#remote');
+		// 				$remoteAudio_.attr('src', URL.createObjectURL(remoteStream));
+		// 				$remoteAudio_[0].play();
+		// 			})
+		// 			peerCall_.on('close',function(){
+		// 				var $remoteAudio_ = $('#remote');
+		// 				$remoteAudio_[0].pause();
+		// 			})
+		// 		}, function() {
+		// 			myApp.alert('Failed to get user microphone.', 'Error');
+		// 		})
+		// 	})
+		// } else if (data.action == 'call' && data.sender == '<?php echo $sender ?>') {
+
+		// } else if (data.action == 'call_cancel' && data.sender != '<?php echo $sender ?>') {
+		// 	$('.messages .message-received.message-call').remove();
+		// } else if (data.action == 'accept' && data.sender != '<?php echo $sender ?>') {
+		// 	var $message = $('<div class="message-last message-with-tail message message-received message-call"><div class="message-text"><span>Call to '+(data.sender == 1 ? 'B' : 'A')+'</span><a href="javascript:;" class="button">Cancel</a></div></div>');
+		// 		$('.messages').append($message);
+		// 	var $cancel = $message.find('a');
+		// 	$cancel.on('click', function() {
+		// 		conn.send(JSON.stringify({
+		// 			sender: '<?php echo $sender ?>',
+		// 			text: '',
+		// 			action: 'call_cancel',
+		// 			number: '<?php echo $room->number ?>'
+		// 		}));
+		// 	})
+		// }
 
 	};
 	function sendMessage(sender) {
@@ -225,7 +276,94 @@
 				// 
 			});
 		});
+
+		$('.image-button').on('touchend', function() {
+			$('#form').empty();
+			var $input = $('<input type="file" accept="image/jpeg, image/gif, image/png" name="file" style="display: none">');
+
+			$('#form').append($input);
+			
+			$input.on('change', function() {
+				if (this.files[0]) {
+					fr = new FileReader();
+
+					fr.onload = function(e) {
+						var $img = $('<img>');
+						$img.attr('src', e.target.result);
+						$img.css('height', '160px');
+						
+
+						var $message = $('<div class="message message-last message-with-tail message-pic"><div class="message-text"></div></div>');
+						$message.addClass('message-sent');
+
+						$message.find('.message-text').append($img);
+						$('.messages').append($message);
+						$('.page-content').animate({
+							scrollTop: $('.messages').height()
+						});
+
+						var fd = new FormData(document.getElementById('form'));
+
+						$.ajax({
+	                        url: '<?php echo Uri::create('rooms/'.$room->number.'/images') ?>',
+	                        type: 'POST',
+	                        data: fd,
+	                        dataType: 'json',
+	                        contentType: false,
+	                        processData: false,
+	                        success: function(data) {
+	                        	$img.attr('src', data.thumb);
+	                        }
+	                    });
+
+					};
+					fr.readAsDataURL(this.files[0]);
+
+					
+				}
+			});
+			$input.trigger('click');
+		});
 	});
+
+<?php if ($room->number == 1) : ?>
+	
+	// var peer = new Peer({key: 'fe062558-02b1-4ec8-8b37-59da55f67cd6'});
+	// var peerId = null;
+	// peer.on('open', function(id) {
+	// 	peerId = id;
+	// 	alert(peerId);
+	// });
+	// peer.on('call', function(call) {
+	// 	console.log(call);
+	// 	getUserMedia({"video":false,"audio":true}, function(stream){
+	// 		call.answer(stream);
+	// 	}, function(){
+	//         myApp.alert('Failed to get user microphone.', 'Error');
+	//     })
+	// 	peerCall_ = call;
+ //        call.on('stream', function(stream){
+ //        	 var $remoteAudio_ = $('#remote');
+ //            $remoteAudio_.attr('src',URL.createObjectURL(stream));
+ //            $remoteAudio_[0].play();
+ //        })
+ //        peerid_ = call.peer;
+	// 	// myApp.confirm('Touch OK to start voicechat!', 'Accepted', function(call) {
+			
+	// 	// });
+	// })
+
+	// var startVoice = function() {
+	// 	conn.send(JSON.stringify({
+	// 		sender: '<?php echo $sender ?>',
+	// 		text: peerId,
+	// 		action: 'call',
+	// 		number: '<?php echo $room->number ?>'
+	// 	}));
+	// }
+
+<?php endif; ?>
+
 </script>
 </body>
 </html>

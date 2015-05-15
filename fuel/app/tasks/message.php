@@ -72,7 +72,7 @@ class Chat implements MessageComponentInterface
 
         \Cli::write('sent = '.($sent ? 'true' : 'false'));
 
-    	if ($data['text'])
+    	if ($data['text'] && ($data['action'] == 'send'))
         {
 	    	$message = \Model_Message::forge(array(
 	    		'text' => \Crypt::encode($data['text']),

@@ -33,3 +33,6 @@ desktop.ini
 #/fuel/app/config/crypt.php
 
 /fuel/app/config/*/db.php
+
+/public/files/images/*
+/public/files/thumbs/*

@@ -103,7 +103,7 @@
 				<div class="right"><a href="javascript:;" class="close-popup button"><i class="fa fa-times"></i></a></div>
 			</div>
 		</div>
-		<div class="page-content">
+		<div>
 			<div class="content-block row">
 <?php $i = 0; foreach ($room->images as $image): ?>
 				<div class="col-33" style="overflow: hidden">
@@ -114,7 +114,6 @@
 		</div>
 	</div>
 	<form id="form" enctype="multipart/form-data" method="post"></form>
-	<!--audio id="remote"></audio-->
 <!-- Path to Framework7 Library JS-->
 <script type="text/javascript" src="/assets/js/framework7.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery.js"></script>
@@ -131,7 +130,6 @@
 	var myApp = new Framework7();
 	var conn = new WebSocket('ws://<?php echo Input::server('SERVER_NAME') ?>:9000');
 	conn.onopen = function(e) {
-		// console.log("Connection established!");
 		conn.send(JSON.stringify({
 			number: '<?php echo $room->number ?>',
 			sender: <?php echo $sender ?>,
@@ -195,48 +193,8 @@
 			});
 		} else if (data.action == 'join' && data.sender != '<?php echo $sender ?>') {
 			notify.config({autoClose: 5000});
-			notify.createNotification("User joined", { body: "Opponent was entering", icon: '/message.ico'});
+			notify.createNotification("User joined", { body: "The partner was entering", icon: '/message.ico'});
 		}
-
-		// else if (data.action == 'call' && data.sender != '<?php echo $sender ?>') {
-		// 	var $message = $('<div class="message-last message-with-tail message message-received message-call"><div class="message-text"><span>Call from '+(data.sender == 1 ? 'A' : 'B')+'</span><a href="javascript:;" class="button button-pink button-fill">Accept</a></div></div>');
-		// 		$('.messages').append($message);
-		// 	var $accept = $message.find('a');
-		// 	var remoteId = data.text;
-		// 	$accept.on('click', function() {
-		// 		$('.messages .message-received.message-call').remove();
-		// 		getUserMedia({"video":false, "audio":true}, function(stream){
-		// 			peerCall_ = peer.call(remoteId, stream);
-		// 			peerCall_.on('stream', function(remoteStream){
-		// 				var $remoteAudio_ = $('#remote');
-		// 				$remoteAudio_.attr('src', URL.createObjectURL(remoteStream));
-		// 				$remoteAudio_[0].play();
-		// 			})
-		// 			peerCall_.on('close',function(){
-		// 				var $remoteAudio_ = $('#remote');
-		// 				$remoteAudio_[0].pause();
-		// 			})
-		// 		}, function() {
-		// 			myApp.alert('Failed to get user microphone.', 'Error');
-		// 		})
-		// 	})
-		// } else if (data.action == 'call' && data.sender == '<?php echo $sender ?>') {
-
-		// } else if (data.action == 'call_cancel' && data.sender != '<?php echo $sender ?>') {
-		// 	$('.messages .message-received.message-call').remove();
-		// } else if (data.action == 'accept' && data.sender != '<?php echo $sender ?>') {
-		// 	var $message = $('<div class="message-last message-with-tail message message-received message-call"><div class="message-text"><span>Call to '+(data.sender == 1 ? 'B' : 'A')+'</span><a href="javascript:;" class="button">Cancel</a></div></div>');
-		// 		$('.messages').append($message);
-		// 	var $cancel = $message.find('a');
-		// 	$cancel.on('click', function() {
-		// 		conn.send(JSON.stringify({
-		// 			sender: '<?php echo $sender ?>',
-		// 			text: '',
-		// 			action: 'call_cancel',
-		// 			number: '<?php echo $room->number ?>'
-		// 		}));
-		// 	})
-		// }
 
 	};
 	function sendMessage(sender) {
@@ -354,19 +312,6 @@
 					fr = new FileReader();
 
 					fr.onload = function(e) {
-						// var $img = $('<img>');
-						// $img.attr('src', e.target.result);
-						// $img.css('height', '160px');
-						
-
-						// var $message = $('<div class="message message-last message-with-tail message-pic"><div class="message-text"></div></div>');
-						// $message.addClass('message-sent');
-
-						// $message.find('.message-text').append($img);
-						// $('.messages').append($message);
-						// $('.page-content').animate({
-						// 	scrollTop: $('.messages').height()
-						// });
 
 						var fd = new FormData(document.getElementById('form'));
 
@@ -378,7 +323,6 @@
 	                        contentType: false,
 	                        processData: false,
 	                        success: function(data) {
-	                        	// $img.attr('src', data.thumb);
 
 	                        	conn.send(JSON.stringify({
 									sender: '<?php echo $sender ?>',
@@ -399,45 +343,6 @@
 		});
 	});
 
-<?php if ($room->number == 1) : ?>
-	
-	// var peer = new Peer({key: 'fe062558-02b1-4ec8-8b37-59da55f67cd6'});
-	// var peerId = null;
-	// peer.on('open', function(id) {
-	// 	peerId = id;
-	// 	alert(peerId);
-	// });
-	// peer.on('call', function(call) {
-	// 	console.log(call);
-	// 	getUserMedia({"video":false,"audio":true}, function(stream){
-	// 		call.answer(stream);
-	// 	}, function(){
-	//         myApp.alert('Failed to get user microphone.', 'Error');
-	//     })
-	// 	peerCall_ = call;
- //        call.on('stream', function(stream){
- //        	 var $remoteAudio_ = $('#remote');
- //            $remoteAudio_.attr('src',URL.createObjectURL(stream));
- //            $remoteAudio_[0].play();
- //        })
- //        peerid_ = call.peer;
-	// 	// myApp.confirm('Touch OK to start voicechat!', 'Accepted', function(call) {
-			
-	// 	// });
-	// })
-
-	// var startVoice = function() {
-	// 	conn.send(JSON.stringify({
-	// 		sender: '<?php echo $sender ?>',
-	// 		text: peerId,
-	// 		action: 'call',
-	// 		number: '<?php echo $room->number ?>'
-	// 	}));
-	// }
-
-<?php endif; ?>
-	
-
 var Album = myApp.photoBrowser({
 	photos : [
 <?php foreach ($room->images as $image) : ?>
@@ -447,9 +352,9 @@ var Album = myApp.photoBrowser({
 	type: 'standalone'
 });
 
-	$('.album-image').on('click', function() {
-		Album.open($(this).attr('data-index'));
-	});
+$('.album-image').on('click', function() {
+	Album.open($(this).attr('data-index'));
+});
 
 
 </script>

@@ -39,6 +39,10 @@ class Chat implements MessageComponentInterface
 
             $this->rooms[$data['number']]->attach($from);
 
+            foreach ($this->rooms[$data['number']] as $client) {
+                $client->send($msg);
+            }
+
             return;
         }
 

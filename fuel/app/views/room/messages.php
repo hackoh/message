@@ -119,6 +119,7 @@
 <script type="text/javascript" src="/assets/js/framework7.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery.js"></script>
 <script type="text/javascript" src="/assets/js/autogrow.min.js"></script>
+<script type="text/javascript" src="/assets/js/desktop-notify.js"></script>
 <script src="https://skyway.io/dist/0.3/peer.js"></script>
 <script>
 
@@ -128,7 +129,7 @@
 					   navigator.msGetUserMedia);
 
 	var myApp = new Framework7();
-	var conn = new WebSocket('ws://<?php echo Input::server('SERVER_NAME') ?>:9000');
+	var conn = new WebSocket('ws://m.impv.net:9000');
 	conn.onopen = function(e) {
 		// console.log("Connection established!");
 		conn.send(JSON.stringify({
@@ -144,7 +145,6 @@
 		});
 	}
 	conn.onmessage = function(e) {
-		// console.log(e.data);
 		var data = $.parseJSON(e.data);
 		if (data.action == 'send') {
 			var $message = $('<div class="message message-last message-with-tail"><div class="message-text"></div></div>');
@@ -152,6 +152,7 @@
 				$message.addClass('message-sent');
 			} else {
 				$message.addClass('message-received');
+				notify.createNotification("New message", { body: data.text});
 			}
 			$message.find('.message-text').html(data.text);
 			$('.messages').append($message);
@@ -190,6 +191,9 @@
 			$('.page-content').animate({
 				scrollTop: $('.messages').height()
 			});
+		} else if (data.action == 'join' && data.sender != '<?php echo $sender ?>') {
+			notify.config({autoClose: 5000});
+			notify.createNotification("User joined", { body: "Opponent was entering"});
 		}
 
 		// else if (data.action == 'call' && data.sender != '<?php echo $sender ?>') {
@@ -249,6 +253,8 @@
 		}));
 	}
 	$(function() {
+
+		notify.requestPermission();
 
 		$(document).on('click', '.message-image', function() {
 			var Photo = myApp.photoBrowser({

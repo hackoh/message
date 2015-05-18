@@ -146,13 +146,15 @@
 	}
 	conn.onmessage = function(e) {
 		var data = $.parseJSON(e.data);
+		console.log(data);
 		if (data.action == 'send') {
 			var $message = $('<div class="message message-last message-with-tail"><div class="message-text"></div></div>');
 			if (data.sender == '<?php echo $sender ?>') {
 				$message.addClass('message-sent');
 			} else {
 				$message.addClass('message-received');
-				notify.createNotification("New message", { body: data.text});
+				notify.config({autoClose: 5000});
+				notify.createNotification("New message", { body: data.text, icon: '/message.ico'});
 			}
 			$message.find('.message-text').html(data.text);
 			$('.messages').append($message);
@@ -193,7 +195,7 @@
 			});
 		} else if (data.action == 'join' && data.sender != '<?php echo $sender ?>') {
 			notify.config({autoClose: 5000});
-			notify.createNotification("User joined", { body: "Opponent was entering"});
+			notify.createNotification("User joined", { body: "Opponent was entering", icon: '/message.ico'});
 		}
 
 		// else if (data.action == 'call' && data.sender != '<?php echo $sender ?>') {

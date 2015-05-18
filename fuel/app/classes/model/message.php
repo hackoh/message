@@ -25,4 +25,9 @@ class Model_Message extends \Orm\Model
 
 	protected static $_table_name = 'messages';
 
+	public static function clear_cached_objects()
+    {
+        static::$_cached_objects['Model_Message'] = array();
+    }
+
 }

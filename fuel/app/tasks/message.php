@@ -13,20 +13,12 @@ class Chat implements MessageComponentInterface
     protected $rooms = array();
  
     public function __construct() {
-        // $this->clients = new \SplObjectStorage;
     }
  
     public function onOpen(ConnectionInterface $conn) {
-        // $this->clients->attach($conn);
     }
  
     public function onMessage(ConnectionInterface $from, $msg) {
-
-        // ob_start();
-        // var_dump($this->rooms);
-        // \Cli::write(ob_get_clean());
-
-    	\Cli::write($msg);
 
     	$data = json_decode($msg, true);
 
@@ -43,10 +35,18 @@ class Chat implements MessageComponentInterface
                 $client->send($msg);
             }
 
+            \Cli::write(date('Y-m-d H:i:s').': '.json_encode(array(
+                'action' => $data['action'],
+                'number' => $data['number'],
+                'sender' => $data['sender'],
+                'sent' => false,
+            )));
+
             return;
         }
 
         \Model_Room::clear_cached_objects();
+        \Model_Message::clear_cached_objects();
 
     	$room = \Model_Room::find_by_number($data['number']);
 
@@ -73,8 +73,6 @@ class Chat implements MessageComponentInterface
     		}
         	$client->send($msg);
         }
-
-        \Cli::write('sent = '.($sent ? 'true' : 'false'));
 
     	if ($data['text'] && ($data['action'] == 'send' || $data['action'] == 'image'))
         {
@@ -106,7 +104,6 @@ class Chat implements MessageComponentInterface
                 try
                 {
                    \Background::forge(array($email, 'send'))->run();
-                    \Cli::write('sent to '.$address);
                 }
                 catch (\Email\EmailValidationFailedException $e)
                 {
@@ -119,6 +116,15 @@ class Chat implements MessageComponentInterface
             }
 	    }
 
+        if ($data['action'] != 'input' && $data['action'] != 'stop')
+        {
+            \Cli::write(date('Y-m-d H:i:s').': '.json_encode(array(
+                'action' => $data['action'],
+                'number' => $data['number'],
+                'sender' => $data['sender'],
+                'sent' => $sent,
+            )));
+        }
        
     }
  
@@ -141,40 +147,4 @@ class Message
 	    $server = IoServer::factory(new WsServer(new Chat), 9000);
 	    $server->run();
 	}
-
-    public static function crypt()
-    {
-        foreach (\Model_Message::find('all') as $message)
-        {
-            $message->text = \Crypt::encode($message->text);
-            $message->save();
-        }
-    }
-
-    public static function test()
-    {
-        $email = \Email::forge('message');
-        $email->from('no-repry@oheya.io', 'oheya.io');
-
-        $email->to('hackoh@softbank.ne.jp');
-
-        $body = \View::forge('email/message', array(
-            'text' => 'test',
-            'url' => '',
-        ));
-        $email->body($body);
-
-        try
-        {
-           \Background::forge(array($email, 'send'))->run();
-        }
-        catch (\Email\EmailValidationFailedException $e)
-        {
-            \Log::warning('EmailValidationFailedException occured email:'.$address);
-        }
-        catch (\Email\EmailSendingFailedException $e)
-        {
-            \Log::warning('EmailSendingFailedException occured email:'.$address);
-        }
-    }
 }

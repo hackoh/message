@@ -93,13 +93,13 @@ class Chat implements MessageComponentInterface
             if (($address = $room->$email) && $sent === false && $data['action'] == 'send')
             {
                 $email = \Email::forge('message');
-                $email->from('no-repry@impv.co.jp', 'm');
+                $email->from('no-repry@oheya.io', 'oheya.io');
 
                 $email->to($address);
 
                 $body = \View::forge('email/message', array(
                     'text' => $data['text'],
-                    'url' => 'http://m.impv.net/rooms/'.$room->number.'/'.$to_sender,
+                    'url' => 'http://oheya.io/rooms/'.$room->number.'/'.$to_sender,
                 ));
                 $email->body($body);
 
@@ -154,7 +154,7 @@ class Message
     public static function test()
     {
         $email = \Email::forge('message');
-        $email->from('no-repry@impv.co.jp', 'm');
+        $email->from('no-repry@oheya.io', 'oheya.io');
 
         $email->to('hackoh@softbank.ne.jp');
 

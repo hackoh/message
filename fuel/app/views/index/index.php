@@ -7,7 +7,7 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<!-- Your app title -->
-	<title>talk</title>
+	<title>oheya.io</title>
 	<!-- Path to Framework7 Library CSS-->
 	<link rel="stylesheet" href="/assets/css/framework7.min.css">
 	<!-- Path to your custom app styles-->
@@ -25,7 +25,7 @@
 			<!-- Top Navbar-->
 			<div class="navbar">
 				<div class="navbar-inner">
-					<div class="left"><a href="/"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
+					<div class="left"><a href="/"><i class="fa fa-comments"></i>&nbsp;oheya.io</a></div>
 				</div>
 			</div>
 			<!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->

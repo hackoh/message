@@ -7,7 +7,7 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
 	<!-- Your app title -->
-	<title><?php echo $room->number ?> | talk</title>
+	<title><?php echo $room->number ?> | oheya.io</title>
 	<!-- Path to Framework7 Library CSS-->
 	<link rel="stylesheet" href="/assets/css/framework7.min.css">
 	<!-- Path to your custom app styles-->
@@ -25,7 +25,7 @@
 			<!-- Top Navbar-->
 			<div class="navbar">
 				<div class="navbar-inner">
-					<div class="left"><a href="/" class="go-home"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
+					<div class="left"><a href="/" class="go-home"><i class="fa fa-comments"></i>&nbsp;oheya.io</a></div>
 					<div class="right">
 						<a href="javascript:;" class="delete-button button button-fill"><i class="fa fa-trash"></i></a>
 						<a href="javascript:;" data-popup=".popup-album" class="open-popup button"><i class="fa fa-th-large"></i></a>
@@ -129,7 +129,7 @@
 					   navigator.msGetUserMedia);
 
 	var myApp = new Framework7();
-	var conn = new WebSocket('ws://m.impv.net:9000');
+	var conn = new WebSocket('ws://<?php echo Input::server('SERVER_NAME') ?>:9000');
 	conn.onopen = function(e) {
 		// console.log("Connection established!");
 		conn.send(JSON.stringify({

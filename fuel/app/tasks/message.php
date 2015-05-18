@@ -72,12 +72,13 @@ class Chat implements MessageComponentInterface
 
         \Cli::write('sent = '.($sent ? 'true' : 'false'));
 
-    	if ($data['text'] && ($data['action'] == 'send'))
+    	if ($data['text'] && ($data['action'] == 'send' || $data['action'] == 'image'))
         {
 	    	$message = \Model_Message::forge(array(
 	    		'text' => \Crypt::encode($data['text']),
 	    		'sender' => $data['sender'],
-	    		'room_id' => $room->id
+	    		'room_id' => $room->id,
+                'action' => $data['action'],
 	    	));
 
 	    	$message->save();
@@ -85,7 +86,7 @@ class Chat implements MessageComponentInterface
             $email = $data['sender'] == 1 ? 'email_2' : 'email_1';
             $to_sender = $data['sender'] == 1 ? 2 : 1;
 
-            if (($address = $room->$email) && $sent === false)
+            if (($address = $room->$email) && $sent === false && $data['action'] == 'send')
             {
                 $email = \Email::forge('message');
                 $email->from('no-repry@impv.co.jp', 'm');

@@ -6,6 +6,7 @@ class Model_Message extends \Orm\Model
 		'id',
 		'room_id',
 		'sender',
+		'action',
 		'text',
 		'created_at',
 		'updated_at',

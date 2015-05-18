@@ -26,7 +26,11 @@
 			<div class="navbar">
 				<div class="navbar-inner">
 					<div class="left"><a href="/" class="go-home"><i class="fa fa-comments"></i>&nbsp;talk</a></div>
-					<div class="right"><a href="javascript:;" class="delete-button button button-fill"><i class="fa fa-trash"></i></a><a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a></div>
+					<div class="right">
+						<a href="javascript:;" class="delete-button button button-fill"><i class="fa fa-trash"></i></a>
+						<a href="javascript:;" data-popup=".popup-album" class="open-popup button"><i class="fa fa-th-large"></i></a>
+						<a href="javascript:;" data-popup=".popup-setting" class="open-popup button"><i class="fa fa-wrench"></i></a>
+					</div>
 				</div>
 			</div>
 			<!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
@@ -48,9 +52,15 @@
 <?php if (($message->created_at - $time) > 1800): ?>
 							<div class="messages-date"><?php echo date('Y-m-d', $message->created_at) ?>&nbsp;<span><?php echo date('H:i', $message->created_at) ?></span></div>
 <?php endif ?>
+<?php if ($message->action == 'image') : ?>
+							<div class="message message-last message-with-tail message-<?php echo $message->sender == $sender ? 'sent': 'received' ?> message-pic">
+								<div class="message-text"><img data-src="/files/images/<?php echo nl2br(\Crypt::decode($message->text)) ?>" src="/files/thumbs/<?php echo nl2br(\Crypt::decode($message->text)) ?>" style="height: 160px" class="message-image"></div>
+							</div>
+<?php else: ?>
 							<div class="message message-last message-with-tail message-<?php echo $message->sender == $sender ? 'sent': 'received' ?>">
 								<div class="message-text"><?php echo nl2br(\Crypt::decode($message->text)) ?></div>
 							</div>
+<?php endif ?>
 <?php $time = $message->created_at; endforeach ?>	
 						</div>
 					</div>
@@ -84,6 +94,24 @@
 		</div>
 		<p class="content-block"><a href="javascript:;" class="submit-setting button button-fill color-pink">OK</a></p>
 		
+	</div>
+	<div class="popup popup-album">
+		<div class="navbar">
+			<div class="navbar-inner">
+				<div class="left"></div>
+				<div class="center">Album</div>
+				<div class="right"><a href="javascript:;" class="close-popup button"><i class="fa fa-times"></i></a></div>
+			</div>
+		</div>
+		<div class="page-content">
+			<div class="content-block row">
+<?php $i = 0; foreach ($room->images as $image): ?>
+				<div class="col-33" style="overflow: hidden">
+					<a href="javascript:;" class="album-image" data-index="<?php echo $i ?>"><img src="<?php echo Uri::create('/files/thumbs/'.$image->saved_as) ?>" style="height: 100%"></a>
+				</div>
+<?php $i++; endforeach ?>
+			</div>
+		</div>
 	</div>
 	<form id="form" enctype="multipart/form-data" method="post"></form>
 	<!--audio id="remote"></audio-->
@@ -141,6 +169,27 @@
 			});
 		} else if (data.action == 'stop' && data.sender != '<?php echo $sender ?>') {
 			$('.messages .message-received.message-input').remove();
+		} else if (data.action == 'image') {
+
+			var $img = $('<img>');
+			$img.attr('src', '/files/thumbs/'+data.text);
+			$img.attr('data-src', '/files/images/'+data.text);
+			$img.css('height', '160px');
+			$img.addClass('message-image');
+
+			var $message = $('<div class="message message-last message-with-tail message-pic"><div class="message-text"></div></div>');
+						
+			if (data.sender == '<?php echo $sender ?>') {
+				$message.addClass('message-sent');
+			} else {
+				$message.addClass('message-received');
+			}
+			$message.find('.message-text').append($img);
+			$('.messages').append($message);
+			$('.messages .message-received.message-input').remove();
+			$('.page-content').animate({
+				scrollTop: $('.messages').height()
+			});
 		}
 
 		// else if (data.action == 'call' && data.sender != '<?php echo $sender ?>') {
@@ -200,6 +249,15 @@
 		}));
 	}
 	$(function() {
+
+		$(document).on('click', '.message-image', function() {
+			var Photo = myApp.photoBrowser({
+				photos: [$(this).attr('data-src')],
+				type: 'standalone'
+			});
+			Photo.open();
+		});
+
 		$('.page-content').animate({
 			scrollTop: $('.messages').height()
 		});
@@ -288,19 +346,19 @@
 					fr = new FileReader();
 
 					fr.onload = function(e) {
-						var $img = $('<img>');
-						$img.attr('src', e.target.result);
-						$img.css('height', '160px');
+						// var $img = $('<img>');
+						// $img.attr('src', e.target.result);
+						// $img.css('height', '160px');
 						
 
-						var $message = $('<div class="message message-last message-with-tail message-pic"><div class="message-text"></div></div>');
-						$message.addClass('message-sent');
+						// var $message = $('<div class="message message-last message-with-tail message-pic"><div class="message-text"></div></div>');
+						// $message.addClass('message-sent');
 
-						$message.find('.message-text').append($img);
-						$('.messages').append($message);
-						$('.page-content').animate({
-							scrollTop: $('.messages').height()
-						});
+						// $message.find('.message-text').append($img);
+						// $('.messages').append($message);
+						// $('.page-content').animate({
+						// 	scrollTop: $('.messages').height()
+						// });
 
 						var fd = new FormData(document.getElementById('form'));
 
@@ -312,7 +370,14 @@
 	                        contentType: false,
 	                        processData: false,
 	                        success: function(data) {
-	                        	$img.attr('src', data.thumb);
+	                        	// $img.attr('src', data.thumb);
+
+	                        	conn.send(JSON.stringify({
+									sender: '<?php echo $sender ?>',
+									text: data.saved_as,
+									action: 'image',
+									number: '<?php echo $room->number ?>'
+								}));
 	                        }
 	                    });
 
@@ -363,6 +428,21 @@
 	// }
 
 <?php endif; ?>
+	
+
+var Album = myApp.photoBrowser({
+	photos : [
+<?php foreach ($room->images as $image) : ?>
+		'<?php echo Uri::create('/files/images/'.$image->saved_as) ?>',
+<?php endforeach; ?>
+	],
+	type: 'standalone'
+});
+
+	$('.album-image').on('click', function() {
+		Album.open($(this).attr('data-index'));
+	});
+
 
 </script>
 </body>

@@ -28,7 +28,7 @@ class Controller_Image extends Controller
 				foreach (Upload::get_files() as $file)
 				{
 					$image = Model_Image::forge($file);
-					$image->room_id = $number;
+					$image->room_id = $room->id;
 					$image->save();
 
 					$i = Image::load($file['saved_to'].$file['saved_as']);

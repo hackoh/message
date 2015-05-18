@@ -35,6 +35,14 @@ class Model_Room extends \Orm\Model
 				'order_by' => array('created_at' => 'asc')
 			)
 		),
+		'images' => array(
+			'model_to' => 'Model_Image',
+			'key_to' => 'room_id',
+			'key_from' => 'id',
+			'conditions' => array(
+				'order_by' => array('created_at' => 'asc')
+			)
+		),
 	);
 
 	public static function validate()

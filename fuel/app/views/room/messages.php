@@ -228,10 +228,17 @@
 				type: 'get',
 				success: function(html) {
 					var $list = $('<div>'+html+'</div>');
-					$list.css('display', 'flex');
-					$list.css('flex-orient', 'flex');
-					$list.css('flex-direction', 'column');
-					$list.css('-webkit-box-orient', 'vertical');
+					$list.css({
+						'display': '-webkit-box',
+						'display': '-ms-flexbox',
+						'display': '-webkit-flex',
+						'display': 'flex',
+						'-webkit-box-orient': 'vertical',
+						'-moz-box-orient': 'vertical',
+						'-ms-flex-direction': 'column',
+						'-webkit-flex-direction': 'column',
+						'flex-direction': 'column'
+					});
 					$('.messages').prepend($list);
 					var currentScroll = $('#message-area').scrollTop();
 					currentScroll = currentScroll + $list.height();

@@ -228,9 +228,9 @@
 				url: '<?php echo Uri::create('rooms/'.$room->number.'/'.$sender) ?>?page='+(++page),
 				type: 'get',
 				success: function(html) {
+					var currentScroll = $('#message-area').scrollTop();
 					var $list = $('<div class="message-wrap-flex">'+html+'</div>');
 					$('.messages').prepend($list);
-					var currentScroll = $('#message-area').scrollTop();
 					currentScroll = currentScroll + $list.height();
 					$('#message-area').animate({
 						scrollTop: currentScroll

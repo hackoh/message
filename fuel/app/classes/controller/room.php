@@ -44,6 +44,8 @@ class Controller_Room extends Controller
 				'number' => $number,
 				'sender' => $sender,
 				'room' => $room,
+				'is_ajax' => Input::is_ajax(),
+				'messages' => $room->get_messages(Input::get('page', 1)),
 			)));
 		}
 	}

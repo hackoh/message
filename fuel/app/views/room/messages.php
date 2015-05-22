@@ -1,3 +1,4 @@
+<?php if ( ! $is_ajax) : ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -46,9 +47,10 @@
 						</div>
 					</div>
 					<!-- Scrollable page content -->
-					<div class="page-content">
+					<div class="page-content" id="message-area">
 						<div class="messages">
-<?php $time = 0; foreach ($room->messages as $message): ?>
+<?php endif ?>
+<?php $time = 0; foreach ($messages as $message): ?>
 <?php if (($message->created_at - $time) > 1800): ?>
 							<div class="messages-date"><?php echo date('Y-m-d', $message->created_at) ?>&nbsp;<span><?php echo date('H:i', $message->created_at) ?></span></div>
 <?php endif ?>
@@ -61,7 +63,8 @@
 								<div class="message-text"><?php echo nl2br(\Crypt::decode($message->text)) ?></div>
 							</div>
 <?php endif ?>
-<?php $time = $message->created_at; endforeach ?>	
+<?php $time = $message->created_at; endforeach ?>
+<?php if ( ! $is_ajax) : ?>
 						</div>
 					</div>
 				</div>
@@ -119,6 +122,7 @@
 <script type="text/javascript" src="/assets/js/jquery.js"></script>
 <script type="text/javascript" src="/assets/js/autogrow.min.js"></script>
 <script type="text/javascript" src="/assets/js/desktop-notify.js"></script>
+<script type="text/javascript" src="/assets/js/jquery.inview.js"></script>
 <script src="https://skyway.io/dist/0.3/peer.js"></script>
 <script>
 
@@ -144,7 +148,6 @@
 	}
 	conn.onmessage = function(e) {
 		var data = $.parseJSON(e.data);
-		console.log(data);
 		if (data.action == 'send') {
 			var $message = $('<div class="message message-last message-with-tail"><div class="message-text"></div></div>');
 			if (data.sender == '<?php echo $sender ?>') {
@@ -216,6 +219,33 @@
 
 		notify.requestPermission();
 
+		var page = 1;
+
+		$(document).on('inview', '.message.more', function() {
+			$(this).removeClass('more');
+			$.ajax({
+				url: '<?php echo Uri::create('rooms/'.$room->number.'/'.$sender) ?>?page='+(++page),
+				type: 'get',
+				success: function(html) {
+					var $list = $('<div>'+html+'</div>');
+					$list.css('display', 'flex');
+					$list.css('flex-orient', 'flex');
+					$list.css('flex-direction', 'column');
+					$list.css('-webkit-box-orient', 'vertical');
+					$('.messages').prepend($list);
+					var currentScroll = $('#message-area').scrollTop();
+					currentScroll = currentScroll + $list.height();
+					$('#message-area').animate({
+						scrollTop: currentScroll
+					}, 0, function() {
+						if ($list.find('.message').length > 0) {
+							$('.message:first').addClass('more');
+						}
+					});
+				}
+			});
+		});
+
 		$(document).on('click', '.message-image', function() {
 			var Photo = myApp.photoBrowser({
 				photos: [$(this).attr('data-src')],
@@ -226,6 +256,8 @@
 
 		$('.page-content').animate({
 			scrollTop: $('.messages').height()
+		}, function() {
+			$('.message:first').addClass('more');
 		});
 		$('textarea').on('keyup', function() {
 			if ($('textarea').val() != '') {
@@ -360,3 +392,4 @@ $('.album-image').on('click', function() {
 </script>
 </body>
 </html>
+<?php endif ?>

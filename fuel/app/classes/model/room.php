@@ -59,4 +59,19 @@ class Model_Room extends \Orm\Model
         static::$_cached_objects['Model_Room'] = array();
     }
 
+    public function get_messages($page)
+    {
+    	$limit = 20;
+    	$offset = ($limit * $page) - $limit;
+    	$messages = Model_Message::find('all', array(
+    		'where' => array(
+    			array('room_id', '=', $this->id),
+    		),
+    		'order_by' => array('created_at' => 'desc'),
+    		'limit' => $limit,
+    		'offset' => $offset,
+    	));
+    	return array_reverse($messages);
+    }
+
 }

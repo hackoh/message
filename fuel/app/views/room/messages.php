@@ -13,6 +13,7 @@
 	<link rel="stylesheet" href="/assets/css/framework7.min.css">
 	<!-- Path to your custom app styles-->
 	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/assets/css/my-app.css">
 </head>
 <body class="theme-pink">
 	<!-- Status bar overlay for full screen mode (PhoneGap) -->
@@ -227,18 +228,7 @@
 				url: '<?php echo Uri::create('rooms/'.$room->number.'/'.$sender) ?>?page='+(++page),
 				type: 'get',
 				success: function(html) {
-					var $list = $('<div>'+html+'</div>');
-					$list.css({
-						'display': '-webkit-box',
-						'display': '-ms-flexbox',
-						'display': '-webkit-flex',
-						'display': 'flex',
-						'-webkit-box-orient': 'vertical',
-						'-moz-box-orient': 'vertical',
-						'-ms-flex-direction': 'column',
-						'-webkit-flex-direction': 'column',
-						'flex-direction': 'column'
-					});
+					var $list = $('<div class="message-wrap-flex">'+html+'</div>');
 					$('.messages').prepend($list);
 					var currentScroll = $('#message-area').scrollTop();
 					currentScroll = currentScroll + $list.height();

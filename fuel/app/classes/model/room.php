@@ -61,7 +61,7 @@ class Model_Room extends \Orm\Model
 
     public function get_messages($page)
     {
-    	$limit = 20;
+    	$limit = 50;
     	$offset = ($limit * $page) - $limit;
     	$messages = Model_Message::find('all', array(
     		'where' => array(
